@@ -2,6 +2,8 @@ import gym
 import envs
 import numpy as np
 
+
+
 MAX_EPISODES = 10
 MAX_TRY = 10
 TASKS_N = 1
@@ -18,6 +20,7 @@ def epsilon_greedy(eps):
         action = np.argmax(q_table[state])
 
 
+'''
 def simulate():
     for episode in range(MAX_EPISODES):
 
@@ -25,13 +28,14 @@ def simulate():
         state = env.reset()
         total_reward = 0
 
-        #do at most 10 queue updates
-#        for time_step in range(MAX_TRY):
+        for time_step in range(FINAL_TIME):
+            if WarehouseEnv.WarehouseSim.is_event(time_step) == True:
+                action = epsilon_greedy(eps)
 
-
-
-
-
+                #update whole simulation based on action
+                WarehouseSim.update(action)
+                    #update(action) will update forklift positions, time, capacities, etc...
+'''
 
 if __name__ == "__main__":
 
