@@ -10,6 +10,9 @@ LOCATIONS_N = 1
 LOC1 = 0
 FORKLIFTS_N = 3
 JOBS_N = 100
+X_DIM = 5
+Y_DIM = 5
+
 
 
 
@@ -22,20 +25,23 @@ class WarehouseEnv(gym.Env):
         self.action_space = spaces.Discrete(JOBS_N * TASKS_N + 1) #+1 for wait action
         self.jobs_n = JOBS_N
         self.capacity = CAPACITY
-        self.queue = np.array([])
-        self.sim = Simulation(X_dim = 5, Y_dim = 7, n_forklifts = 3)
+        self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N)
         print('Environment initialized')
 
-
-
-
-
-
     def step(self, action = None):
-
+        reward = 0.0
+        #update the simulation based on the actions
+        #calculate the reward based on the action
+        #calculate whether the simulation has ended (done = False)
+        #return observation, reward, done, _
         print('Step successful')
 
     def reset(self):
+        self.jobs_n = JOBS_N
+        self.capacity = CAPACITY
+        self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N, joblist_n = JOBS_N, task_n = TASKS_N)
+
+        #return observation (This will just be the initial state of the simulation)
         print('Environment reset')
 
 
@@ -55,4 +61,5 @@ class WarehouseEnv(gym.Env):
         if action == self.action_space.n - 1: #execute wait action
             pass
         else:
-            action = (action / self.sim.task_n, action % self.sim.task_n)
+            action = (action / self.sim.task_n, action % self.sim.task_n) #(location, task length)
+            #update the job list at location action[0] by removing a job of length action[1]

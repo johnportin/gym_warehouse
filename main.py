@@ -19,6 +19,14 @@ def epsilon_greedy(eps):
     else:
         action = np.argmax(q_table[state])
 
+def init_Q():
+    #calculat total number of states:
+    total_states = TASKS_N * LOCATIONS_N + LOCATIONS_N + FORKLIFTS_N + 1
+
+    #initialize a (size of actions space) x (total states) array of zeros
+    Q = np.zeros((env.action_space.n, total_states))
+    return Q
+
 
 '''
 def simulate():
@@ -47,7 +55,6 @@ if __name__ == "__main__":
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
     #initialize q table with zeros as dictionary
-    q_table = {i : np.zeros(TASKS_N * LOCATIONS_N + LOCATIONS_N + FORKLIFTS_N + 1) for i in range(env.action_space.n)}
 
     env.step()
     env.render()
