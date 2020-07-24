@@ -29,8 +29,11 @@ def simulate():
         total_reward = 0
 
         for time_step in range(FINAL_TIME):
-            if WarehouseEnv.WarehouseSim.is_event(time_step) == True:
+            if env.done == True:
+                break
+            elif (forklift is available):
                 action = epsilon_greedy(eps)
+                env.sim.(do action)
 
                 #update whole simulation based on action
                 WarehouseSim.update(action)
