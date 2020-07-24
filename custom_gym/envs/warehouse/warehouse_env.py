@@ -26,9 +26,24 @@ class WarehouseEnv(gym.Env):
 
     def step(self, action):
         reward = 0.0
+        #simulation has already been updated based on the action
+        '''
+        for name in env.sim.forklift_names:         #loop over forklifts
+            forklift = env.sim.__getattribute__(name)
+
+            if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
+                action = epsilonGreedy(epsilon)
+                try:    #assign job and update environment if possible
+                    forklift.task_list = env.buckets[action][0]
+                    forklift.update_travel_time(time_step)
+                    observation, reward, done, _ = env.step(action)
+                except: #otherwise, take a negative reward
+                    reward -= REWARD_BAD_SCHEDULE
+        '''
+
+        observation = self.sim.getObs()
 
 
-        #update the simulation based on the actions
         #calculate the reward based on the action
         #calculate whether the simulation has ended (done = False)
         #return observation, reward, done, _
@@ -57,3 +72,9 @@ class WarehouseEnv(gym.Env):
         else:
             action = (action / self.sim.task_n, action % self.sim.task_n) #(location, task length)
             #update the job list at location action[0] by removing a job of length action[1]
+
+    def reward(self):
+        pass
+
+    def getObs(self):
+        pass

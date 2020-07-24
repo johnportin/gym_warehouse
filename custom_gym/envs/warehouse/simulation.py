@@ -11,17 +11,64 @@ class Simulation:
     This sets up our Environment
     '''
     def __init__(self, X_dim, Y_dim, n_forklifts = 1, joblist_n = 100, task_n = 3):
-        self.time = 0
+        self.WAREHOUSE_DIM = X_dim
+        self.LAB = [0, Y_dim - 1]
+        self.SHIPPING = [X_dim - 1, Y_dim - 1]
+        self.RECEIVING = [0,0]
+
         self.forklifts_n = n_forklifts
         self.warehouse = Warehouse(x_dim = X_dim, y_dim = Y_dim, receiving = [0,0], shipping = [X_dim - 1, Y_dim - 1], lab = [0, Y_dim - 1])
-        self.forklifts = list(self.__setattr__('Forklift'+str(k), Forklift(start_position = [0,0], job = None)) for k in range(n_forklifts))
+        #self.forklifts = list(self.__setattr__('Forklift'+str(k), Forklift(start_position = [0,0], job = None)) for k in range(n_forklifts))
+
+        self.jobs_n = joblist_n
         self.task_n = task_n
         self.joblist = self._generate_job_list()
         self.buckets = self._make_buckets(self._joblist_to_dict(self.joblist))
-        for k in range(self.n_forklifts):
-            self.__setattr__('Forklift'+str(k), Forklift(self.forklift_start_positions[k], forklift_job_lists[k]))
+
+        self.forklift_names = []
+        for k in range(self.forklifts_n):
+            self.__setattr__('Forklift'+str(k), Forklift(None, None))
             self.forklift_names.append('Forklift'+str(k))
-        #self.jobs_n = len(self.joblist)
+
+    def getJobType(self, job):
+        locations = [self.SHIPPING, self.LAB, self.RECEIVING]
+        if job != None:
+            for task in job:
+                for i in range(len(locations)):
+                    if task == locations[i]:
+                        return i
+        else:
+            return None
+
+    def getCapacity(self):
+        capacities = np.zeros(3)
+        '''
+            loop over all forklifts and update capacity based on how many
+            forklifts are currently assigned to that location
+        '''
+        for name in self.forklift_names:         #loop over forklifts
+            forklift = self.__getattribute__(name)
+            job = forklift.task_list
+            index = self.getJobType(job)
+            capacities[index] += 1
+        return capacities
+
+    def getObs(self):
+        observation = np.zeros((self.task_n + 1) * 3 + self.forklifts_n + 1)
+        locations = [self.SHIPPING, self.LAB, self.RECEIVING]
+
+        for i in range(len(locations)): #update number of jobs left of each type
+            for tsk_len in range(self.task_n):
+                #observation[3*i+tsk_len] = len(self.buckets[tuple((locations[i], tsk_len+1))])
+                pass
+        capacities = self.getCapacity() #grab capacities and update observation
+        start_cap = self.task_n*3
+        for i in range(3):
+            observation[start_cap+i] = capacities[i]
+
+        return observation
+
+
 
     #def getJob(action, pos = 0):
     #    job = self.bucket[action][pos]
@@ -37,15 +84,6 @@ class Simulation:
     #                if task1 == task2:
     #                    return False
     #    return True
-
-
-
-
-
-    def getObs():
-        #convert attributes of the class to the correct observation format
-        pass
-
 
     """
     Helper functions below
@@ -117,5 +155,5 @@ class Simulation:
         Generate a tuple list, with each item in the list representing
         a job, and its type. List length is defined as the joblist length.
         """
-        tuple_list = [self._generate_random_job() for i in range(self.joblist_n)]
+        tuple_list = [self._generate_random_job() for i in range(self.jobs_n)]
         return tuple_list

@@ -41,3 +41,9 @@ def env.sim.update():
                 update travel time (automatically sets status to complete if necessary)
                 if job is complete:
                     make forklift available to agent (change status to "queued")
+
+
+
+
+#an observation
+#[o_11, ..., o_33, l_1, l_2, l_3, ]

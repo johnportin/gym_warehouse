@@ -13,6 +13,8 @@ LOC1 = 0
 FORKLIFTS_N = 3
 FINAL_TIME = 1000
 
+REWARD_BAD_SCHEDULE = -10
+
 #hyperparameters
 epsilon = 0.7  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
@@ -31,36 +33,33 @@ def initQ():
     Q = np.zeros((env.action_space.n, total_states))
     return Q
 
-def simulateOnce():
-        #initialize environment
-        Q = initQ()
-        observation = env.reset()
-        total_reward = 0
 
-        for time_step in range(FINAL_TIME): #while env.done == False
+
+def simulateOnce():
+    #initialize environment
+    Q = initQ()
+    observation = env.reset()
+    total_reward = 0
+
+    for time_step in range(FINAL_TIME): #while env.done == False
+        if env.done == True:
+            break
+        else:
             #add loop to assign all queued forklifts or until action == wait
-            for name in env.sim.forklift_names:
+            for name in env.sim.forklift_names:         #loop over forklifts
                 forklift = env.sim.__getattribute__(name)
 
-                if forklift.status == '' or forklift.status == 'complete':
+                if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
                     action = epsilonGreedy(epsilon)
-                    try:
+                    try:    #assign job and update environment if possible
                         forklift.task_list = env.buckets[action][0]
                         forklift.update_travel_time(time_step)
                         observation, reward, done, _ = env.step(action)
-                    except:
-                        reward -= 10
+                    except: #otherwise, take a negative reward
+                        reward -= REWARD_BAD_SCHEDULE #Definitely need to tune this value
+            #tally up the reward and update the Q table
+        #report total results
 
-            action = epsilonGreedy(epsilon)
-            #env.step(action)
-
-
-
-
-            observation, reward, done, _ = env.step(action)
-                #update whole simulation based on action
-                #WarehouseSim.update(action)
-                    #update(action) will update forklift positions, time, capacities, etc...
 
 
 if __name__ == "__main__":
