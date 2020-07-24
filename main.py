@@ -13,13 +13,17 @@ LOC1 = 0
 FORKLIFTS_N = 3
 FINAL_TIME = 1000
 
-def epsilon_greedy(eps):
+#hyperparameters
+epsilon = 0.7  #for epsilon greedy
+granularity =  1 #default = 1 is three levels
+
+def epsilonGreedy(eps):
     if np.random.uniform(0,1) < eps:
         action = env.action_space.sample()
     else:
         action = np.argmax(q_table[state])
 
-def init_Q():
+def initQ():
     #calculat total number of states:
     total_states = TASKS_N * LOCATIONS_N + LOCATIONS_N + FORKLIFTS_N + 1
 
@@ -27,26 +31,22 @@ def init_Q():
     Q = np.zeros((env.action_space.n, total_states))
     return Q
 
-
-'''
-def simulate():
-    for episode in range(MAX_EPISODES):
-
+def simulateOnce():
         #initialize environment
-        state = env.reset()
+        Q = initQ()
+        observation = env.reset()
         total_reward = 0
 
         for time_step in range(FINAL_TIME):
-            if env.done == True:
-                break
-            elif (forklift is available):
-                action = epsilon_greedy(eps)
-                env.sim.(do action)
+            action = epsilonGreedy(epsilon)
 
+
+
+            observation, reward, done, _ = env.step(action)
                 #update whole simulation based on action
-                WarehouseSim.update(action)
+                #WarehouseSim.update(action)
                     #update(action) will update forklift positions, time, capacities, etc...
-'''
+
 
 if __name__ == "__main__":
 
@@ -56,6 +56,6 @@ if __name__ == "__main__":
     env = gym.make('Warehouse-v0')
     #initialize q table with zeros as dictionary
 
-    env.step()
+    env.step(action = 0)
     env.render()
     env.reset()

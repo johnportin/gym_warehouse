@@ -14,10 +14,6 @@ X_DIM = 5
 Y_DIM = 5
 
 
-
-
-
-
 class WarehouseEnv(gym.Env):
     def __init__(self):
         #Defines an array [length of joblist, number of forklifts, capacity of dropoff, position of forklifts x3]
@@ -28,8 +24,13 @@ class WarehouseEnv(gym.Env):
         self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N)
         print('Environment initialized')
 
-    def step(self, action = None):
+    def step(self, action):
         reward = 0.0
+        for i in range(len(self.sim.bucket[action])):
+            job = self.sim.getJob(action = action, pos = i)
+            if self.sim.isValid(job):
+                break
+
         #update the simulation based on the actions
         #calculate the reward based on the action
         #calculate whether the simulation has ended (done = False)
@@ -52,12 +53,8 @@ class WarehouseEnv(gym.Env):
         #print(output)
 
 
-    def interaction_with_ourActualEnv1():
-        #update something about the environment
-        pass
-
     #def what do with with an action
-    def do_action(action):
+    def do_action(self, action):
         if action == self.action_space.n - 1: #execute wait action
             pass
         else:
