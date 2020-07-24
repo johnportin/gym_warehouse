@@ -15,25 +15,28 @@ class Simulation:
         self.forklifts_n = n_forklifts
         self.warehouse = Warehouse(x_dim = X_dim, y_dim = Y_dim, receiving = [0,0], shipping = [X_dim - 1, Y_dim - 1], lab = [0, Y_dim - 1])
         self.forklifts = list(self.__setattr__('Forklift'+str(k), Forklift(start_position = [0,0], job = None)) for k in range(n_forklifts))
-
         self.task_n = task_n
-        self.bucket = [[]]
+        self.joblist = self._generate_job_list()
+        self.buckets = self._make_buckets(self._joblist_to_dict(self.joblist))
+        for k in range(self.n_forklifts):
+            self.__setattr__('Forklift'+str(k), Forklift(self.forklift_start_positions[k], forklift_job_lists[k]))
+            self.forklift_names.append('Forklift'+str(k))
         #self.jobs_n = len(self.joblist)
 
-    def getJob(action, pos = 0):
-        job = self.bucket[action][pos]
-        return job
+    #def getJob(action, pos = 0):
+    #    job = self.bucket[action][pos]
+    #    return job
 
-    def updateBuckets(action, pos = 0): #here, the action will be a bucket selection
-        self.bucket[action].pop(pos)
+    #def updateBuckets(action, pos = 0): #here, the action will be a bucket selection
+    #    self.bucket[action].pop(pos)
 
-    def isValid(job): ###Is there a way to clean this up?
-        for forklift in self.forklifts:
-            for task1 in forklift.task_list:
-                for task2 in job:
-                    if task1 == task2:
-                        return False
-        return True
+    #def isValid(job): ###Is there a way to clean this up?
+    #    for forklift in self.forklifts:
+    #        for task1 in forklift.task_list:
+    #            for task2 in job:
+    #                if task1 == task2:
+    #                    return False
+    #    return True
 
 
 

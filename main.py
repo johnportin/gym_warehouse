@@ -37,8 +37,23 @@ def simulateOnce():
         observation = env.reset()
         total_reward = 0
 
-        for time_step in range(FINAL_TIME):
+        for time_step in range(FINAL_TIME): #while env.done == False
+            #add loop to assign all queued forklifts or until action == wait
+            for name in env.sim.forklift_names:
+                forklift = env.sim.__getattribute__(name)
+
+                if forklift.status == '' or forklift.status == 'complete':
+                    action = epsilonGreedy(epsilon)
+                    try:
+                        forklift.task_list = env.buckets[action][0]
+                        forklift.update_travel_time(time_step)
+                        observation, reward, done, _ = env.step(action)
+                    except:
+                        reward -= 10
+
             action = epsilonGreedy(epsilon)
+            #env.step(action)
+
 
 
 

@@ -26,10 +26,7 @@ class WarehouseEnv(gym.Env):
 
     def step(self, action):
         reward = 0.0
-        for i in range(len(self.sim.bucket[action])):
-            job = self.sim.getJob(action = action, pos = i)
-            if self.sim.isValid(job):
-                break
+
 
         #update the simulation based on the actions
         #calculate the reward based on the action
