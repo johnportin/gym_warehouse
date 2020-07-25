@@ -4,15 +4,18 @@ import numpy as np
 from envs.warehouse.components import Warehouse, Forklift, FloorPatch
 from envs.warehouse.simulation import Simulation
 
+# WAREHOUSE SETTINGS
 TASKS_N = 1
+JOBS_N = 30
 CAPACITY = 2
 LOCATIONS_N = 1
-LOC1 = 0
 FORKLIFTS_N = 3
-JOBS_N = 100
 X_DIM = 5
 Y_DIM = 5
 
+#TRAINING SETTINGS
+REWARD_BAD_SCHEDULE = -10
+FINAL_TIME = 1000
 
 class WarehouseEnv(gym.Env):
     def __init__(self):
@@ -22,26 +25,32 @@ class WarehouseEnv(gym.Env):
         self.jobs_n = JOBS_N
         self.capacity = CAPACITY
         self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N)
+        self.done = False
         print('Environment initialized')
 
-    def step(self, action):
+    def step(self, action, time, forklift = None):
         reward = 0.0
-        #simulation has already been updated based on the action
-        '''
-        for name in env.sim.forklift_names:         #loop over forklifts
-            forklift = env.sim.__getattribute__(name)
+        done = False
 
-            if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
-                action = epsilonGreedy(epsilon)
-                try:    #assign job and update environment if possible
-                    forklift.task_list = env.buckets[action][0]
-                    forklift.update_travel_time(time_step)
-                    observation, reward, done, _ = env.step(action)
-                except: #otherwise, take a negative reward
-                    reward -= REWARD_BAD_SCHEDULE
-        '''
+        if self.sim.isFeasible(action):
+            #access the job and remove it from the job list
+            job = self.sim.buckets[action][0]
+            forklift.job_list = job
+            forklift.update_pick_up_time(time)
+            self.sim.buckets[action][0].remove(job)
+            self.sim.update(time)
+        else: #otherwise, take a negative reward
+            reward -= REWARD_BAD_SCHEDULE
 
         observation = self.sim.getObs()
+
+        #check whether all the buckets are empty
+        for item in range(TASKS_N * LOCATIONS_N):
+            if observation[item] != 0:
+                break
+            else: #if they are all empty, end the Simulation
+                done = True
+        return observation, reward, done
 
 
         #calculate the reward based on the action
@@ -57,24 +66,14 @@ class WarehouseEnv(gym.Env):
         #return observation (This will just be the initial state of the simulation)
         print('Environment reset')
 
-
-
     def render(self):
         print(self.observation_space)
         #output = 'Completed {} jobs so far'.format(self.observation_space)
         #print(output)
 
-
-    #def what do with with an action
     def do_action(self, action):
         if action == self.action_space.n - 1: #execute wait action
             pass
         else:
             action = (action / self.sim.task_n, action % self.sim.task_n) #(location, task length)
             #update the job list at location action[0] by removing a job of length action[1]
-
-    def reward(self):
-        pass
-
-    def getObs(self):
-        pass

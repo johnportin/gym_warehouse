@@ -1,11 +1,6 @@
 from envs.warehouse.components import Warehouse, Forklift, FloorPatch
 import numpy as np
 
-
-
-
-
-
 class Simulation:
     '''
     This sets up our Environment
@@ -53,37 +48,60 @@ class Simulation:
             capacities[index] += 1
         return capacities
 
+    def capacityToGrad(self, mylist):
+        gradient = [0, self.jobs_n / (self.task_n * 3 * 2), self.jobs_n / self.task_n]
+        for i in range(len(mylist)):
+            if mylist[i] <= 0:
+                mylist[i] = 0
+            if mylist[i] > 0 and mylist[i] <= gradient[1]:
+                mylist[i] = 1
+            if mylist[i] > gradient[1] and mylist[i] < gradient[2]:
+                mylist[i] = 2
+            else:
+                mylist[i] = 3
+        return mylist
+
     def getObs(self):
         observation = np.zeros((self.task_n + 1) * 3 + self.forklifts_n + 1)
-        locations = [self.SHIPPING, self.LAB, self.RECEIVING]
+        locations = ['Shipping', 'Lab', 'Receiving']
 
         for i in range(len(locations)): #update number of jobs left of each type
             for tsk_len in range(self.task_n):
-                #observation[3*i+tsk_len] = len(self.buckets[tuple((locations[i], tsk_len+1))])
-                pass
+                observation[3*i+tsk_len] = len(self.buckets[(locations[i], tsk_len+2)])
+
         capacities = self.getCapacity() #grab capacities and update observation
+        capacities = self.capacityToGrad(capacities)
         start_cap = self.task_n*3
         for i in range(3):
             observation[start_cap+i] = capacities[i]
 
         return observation
 
+    def isFeasible(self, action):
+        try:
+            self.buckets[action][0]
+            return True
+        except:
+            return False
 
+    def update(self, time):   #updates the simulation, does not update time
+        #loop through all forklifts and update their status
+        for name in self.forklift_names:
+            forklift = self.__getattribute__(name)
 
-    #def getJob(action, pos = 0):
-    #    job = self.bucket[action][pos]
-    #    return job
-
-    #def updateBuckets(action, pos = 0): #here, the action will be a bucket selection
-    #    self.bucket[action].pop(pos)
-
-    #def isValid(job): ###Is there a way to clean this up?
-    #    for forklift in self.forklifts:
-    #        for task1 in forklift.task_list:
-    #            for task2 in job:
-    #                if task1 == task2:
-    #                    return False
-    #    return True
+            #updates a forklift if its time has come
+            if forklift.next_update_time <= time:
+                #if next location is unoccupied, add this forklift to it and update the next time
+                if forklift.status == 'traveling' or forklift.status == 'waiting':
+                    if self.warehouse.__getattribute__(str(forklift.position)).occupied == 0:
+                        self.warehouse.__getattribute__(str(forklift.position)).add_forklift()
+                        forklift.update_pick_up_time(time)
+                    else:
+                        forklift.status = 'waiting'
+                #if it was picking, update its status to next position
+                elif forklift.status == 'picking':
+                    self.warehouse.__getattribute__(str(forklift.position)).remove_forklift()
+                    forklift.update_travel_time(time)
 
     """
     Helper functions below

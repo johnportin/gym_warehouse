@@ -6,36 +6,41 @@ import numpy as np
 
 MAX_EPISODES = 10
 MAX_TRY = 10
-TASKS_N = 1
-CAPACITY = 2
-LOCATIONS_N = 1
-LOC1 = 0
-FORKLIFTS_N = 3
-FINAL_TIME = 1000
-
+TASKS_N = 3
+JOBS_N = 30
+CAPACITY = 3
+LOCATIONS_N = 3
+FORKLIFTS_N = 20
+FINAL_TIME = 10000
+X_DIM = 5
+Y_DIM = 5
 REWARD_BAD_SCHEDULE = -10
+
 
 #hyperparameters
 epsilon = 0.7  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
 
 def epsilonGreedy(eps):
+    action = env.action_space.sample()
+    '''
     if np.random.uniform(0,1) < eps:
         action = env.action_space.sample()
     else:
         action = np.argmax(q_table[state])
+    '''
 
 def initQ():
     #calculat total number of states:
     total_states = TASKS_N * LOCATIONS_N + LOCATIONS_N + FORKLIFTS_N + 1
 
     #initialize a (size of actions space) x (total states) array of zeros
-    Q = np.zeros((env.action_space.n, total_states))
+    Q = np.zeros((TASKS_N * LOCATIONS_N + 1, total_states))
     return Q
 
 
 
-def simulateOnce():
+def runEpisode():
     #initialize environment
     Q = initQ()
     observation = env.reset()
@@ -51,14 +56,16 @@ def simulateOnce():
 
                 if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
                     action = epsilonGreedy(epsilon)
-                    try:    #assign job and update environment if possible
-                        forklift.task_list = env.buckets[action][0]
-                        forklift.update_travel_time(time_step)
-                        observation, reward, done, _ = env.step(action)
-                    except: #otherwise, take a negative reward
-                        reward -= REWARD_BAD_SCHEDULE #Definitely need to tune this value
-            #tally up the reward and update the Q table
-        #report total results
+                    observation, reward, done = env.step(action, time_step, forklift)
+        print(observation)
+        print(time_step)
+        total_reward += reward
+        if done == True:
+            env.render()
+            env.reset()
+            break
+
+
 
 
 
@@ -69,7 +76,8 @@ if __name__ == "__main__":
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
     #initialize q table with zeros as dictionary
+    runEpisode()
 
-    env.step(action = 0)
+    #env.step()
     env.render()
     env.reset()
