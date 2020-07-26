@@ -57,16 +57,21 @@ class WarehouseEnv(gym.Env):
             print('Final observation before done = {}'.format(observation))
             done = True
 
-
-
-
         return observation, reward, done
-
 
         #calculate the reward based on the action
         #calculate whether the simulation has ended (done = False)
         #return observation, reward, done, _
         print('Step successful')
+
+
+    def episode_reward(self): #reward for end of episode
+        observation = self.sim.getObs()
+        penalty = 0.0
+        for i in range(9):
+            penalty += observation[i]
+        reward = 1 - penalty/(env.JOBS_N) #penalize if jobs left over
+        return reward
 
     def reset(self):
         self.jobs_n = JOBS_N

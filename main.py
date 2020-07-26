@@ -1,6 +1,8 @@
 import gym
 import envs
 import numpy as np
+import Q_table_module
+
 
 
 
@@ -35,6 +37,7 @@ def runEpisode():
     #initialize environment
     observation = env.reset()
     total_reward = 0
+    Q = Q_table_module.Q_table(TASKS_N, CAPACITY, env.action_space)
 
     for time_step in range(FINAL_TIME): #while env.done == False
         print('Time = {} '.format(time_step) + '-'*20)
@@ -51,8 +54,10 @@ def runEpisode():
                     print('assigning forklift')
                     #action = epsilonGreedy(epsilon)
                     action = env.action_space.sample()
+                    observation_temp = observation
                     observation, reward, done = env.step(action, time_step, forklift)
-                    print(observation)
+                    Q.Update_Q(observation_temp, observation, action, reward)
+                    #print(observation)
         total_reward += reward
         if done == True:
             print('Exiting at the bottom')
