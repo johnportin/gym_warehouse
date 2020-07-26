@@ -6,7 +6,8 @@ import numpy as np
 class Q_table:
     def __init__(self,
                  max_task_len = 4,
-                 max_capacity = 5, 
+                 max_capacity = 5,
+                 norm_cap = 3,
                  action_space = None,
                  learning_rate = 0.9, 
                  discount = 0.6):
@@ -16,6 +17,7 @@ class Q_table:
         self.CAP_SHIP = max_capacity # max capacity at shipping
         self.CAP_LAB = max_capacity
         self.CAP_RECEIVE = max_capacity
+        self.NORM_CAP = norm_cap # normalized cap for each kind of job type
         self.action_space = action_space
         self.learning_rate = learning_rate
         self.discount = discount
@@ -49,7 +51,15 @@ class Q_table:
         OBS_DICT = {}
         """
         Observations have the following structure:
-        (Task Length,
+        (Num of job Type Shipping w len 2,
+        Num of job Type Shipping w len 3,
+        Num of job Type Shipping w len 4,
+        Num of job Type Lab w len 2,
+        Num of job Type Lab w len 3,
+        Num of job Type Lab w len 4,
+        Num of job Type Receiving w len 2,
+        Num of job Type Receiving w len 3,
+        Num of job Type Receiving w len 4
         Destination Type,
         Capacity at Shipping,
         Capacity at Lab,
@@ -58,16 +68,29 @@ class Q_table:
         This function associates all possible observation state
         """
         key = 0
+        job_load = list(range(self.NORM_CAP + 1)) # all allowed job load (normalized) for each type: 0,1,2,3
         destinations = ['Shipping', 'Lab', 'Receiving']
         if_forklift_available = [True, False]
-        for task_len in range(2, self.MAX_TASK_LEN + 1):
-            for destination in destinations:
-                for cap_ship in range(self.CAP_SHIP+1):
-                    for cap_lab in range(self.CAP_LAB+1):
-                        for cap_receive in range(self.CAP_RECEIVE+1):
-                            for if_avai_fl in if_forklift_available:
-                                OBS_DICT[key] = (task_len,destination,cap_ship,cap_lab,cap_receive,if_avai_fl)
-                                key += 1
+        for loadS2 in job_load: 
+            for loadS3 in job_load:
+                for loadS4 in job_load:
+                    for loadL2 in job_load:
+                        for loadL3 in job_load:
+                            for loadL4 in job_load:
+                                for loadR2 in job_load:
+                                    for loadR3 in job_load:
+                                        for loadR4 in job_load:
+                                            for cap_ship in range(self.CAP_SHIP+1):
+                                                for cap_lab in range(self.CAP_LAB+1):
+                                                    for cap_receive in range(self.CAP_RECEIVE+1):
+                                                        for if_avai_fl in if_forklift_available:
+                                                            OBS_DICT[key] = (loadS2,loadS3,loadS4,
+                                                                             loadL2,loadL3,loadL4,
+                                                                             loadR2,loadR3,loadR4,
+                                                                             cap_ship,cap_lab,cap_receive,if_avai_fl)
+                                                            key += 1
+        
+
         return OBS_DICT
     
 
