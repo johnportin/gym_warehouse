@@ -13,6 +13,7 @@ class Simulation:
 
         self.forklifts_n = n_forklifts
         self.warehouse = Warehouse(x_dim = X_dim, y_dim = Y_dim, receiving = [0,0], shipping = [X_dim - 1, Y_dim - 1], lab = [0, Y_dim - 1])
+        self.locations_n = 3
         #self.forklifts = list(self.__setattr__('Forklift'+str(k), Forklift(start_position = [0,0], job = None)) for k in range(n_forklifts))
 
         self.jobs_n = joblist_n
@@ -22,15 +23,18 @@ class Simulation:
 
         self.forklift_names = []
         for k in range(self.forklifts_n):
-            self.__setattr__('Forklift'+str(k), Forklift(None, None))
+            self.__setattr__('Forklift'+str(k), Forklift([0,0], []))
             self.forklift_names.append('Forklift'+str(k))
 
     def getJobType(self, job):
         locations = [self.SHIPPING, self.LAB, self.RECEIVING]
-        if job != None:
+        #print('job = ', job)
+        if len(job) > 0:
+            #print('looking for the job')
             for task in job:
                 for i in range(len(locations)):
-                    if task == locations[i]:
+                    #print('{}, {}, types {} and {}'.format(task, locations[i], type(task), type(locations[i])))
+                    if list(task) == locations[i]:
                         return i
         else:
             return None
@@ -41,45 +45,62 @@ class Simulation:
             loop over all forklifts and update capacity based on how many
             forklifts are currently assigned to that location
         '''
+
         for name in self.forklift_names:         #loop over forklifts
             forklift = self.__getattribute__(name)
-            job = forklift.task_list
+            job = forklift.job_list
+            #print('getCapacity(): job = ', forklift.job_list)
             index = self.getJobType(job)
+            #print('job type = {}'.format(index))
             capacities[index] += 1
+            print('cap = {}'.format(capacities))
+
         return capacities
 
-    def capacityToGrad(self, mylist):
+    def toGrad(self, obs): #converts
         gradient = [0, self.jobs_n / (self.task_n * 3 * 2), self.jobs_n / self.task_n]
-        for i in range(len(mylist)):
-            if mylist[i] <= 0:
-                mylist[i] = 0
-            if mylist[i] > 0 and mylist[i] <= gradient[1]:
-                mylist[i] = 1
-            if mylist[i] > gradient[1] and mylist[i] < gradient[2]:
-                mylist[i] = 2
-            else:
-                mylist[i] = 3
-        return mylist
+        if obs <= 0:
+            obs = 0
+        elif obs > 0 and obs <= gradient[1]:
+            obs = 1
+        elif obs > gradient[1] and obs < gradient[2]:
+            obs = 2
+        else:
+            obs = 3
+        return obs
 
     def getObs(self):
-        observation = np.zeros((self.task_n + 1) * 3 + self.forklifts_n + 1)
+        observation = np.zeros((self.task_n + 1) * 3 + 1) #each (loc, tasklength) pair + capacity of each location (These are set to 3?) + 1 (I forgot, it doesn't get updated)
         locations = ['Shipping', 'Lab', 'Receiving']
 
         for i in range(len(locations)): #update number of jobs left of each type
             for tsk_len in range(self.task_n):
-                observation[3*i+tsk_len] = len(self.buckets[(locations[i], tsk_len+2)])
+                observation[3*i+tsk_len] = self.toGrad(len(self.buckets[(locations[i], tsk_len+2)]))
 
         capacities = self.getCapacity() #grab capacities and update observation
-        capacities = self.capacityToGrad(capacities)
         start_cap = self.task_n*3
         for i in range(3):
             observation[start_cap+i] = capacities[i]
 
         return observation
 
+
+    def getAction(self, action):
+        locations = ['Shipping', 'Lab', 'Receiving']
+        x = action / self.locations_n
+        y = action % self.task_n
+        x, y = int(x), int(y) #cast to integers
+        action = (locations[x], y+2)
+        return action
+
+
+
     def isFeasible(self, action):
         try:
+
+            print(self.buckets[action][0])
             self.buckets[action][0]
+            print('is feasible')
             return True
         except:
             return False
@@ -94,12 +115,14 @@ class Simulation:
                 #if next location is unoccupied, add this forklift to it and update the next time
                 if forklift.status == 'traveling' or forklift.status == 'waiting':
                     if self.warehouse.__getattribute__(str(forklift.position)).occupied == 0:
+                        print('adding forklif to {}'.format(forklift.position))
                         self.warehouse.__getattribute__(str(forklift.position)).add_forklift()
                         forklift.update_pick_up_time(time)
                     else:
                         forklift.status = 'waiting'
                 #if it was picking, update its status to next position
                 elif forklift.status == 'picking':
+                    print('removing forklift at {}'.format(forklift.position))
                     self.warehouse.__getattribute__(str(forklift.position)).remove_forklift()
                     forklift.update_travel_time(time)
 
@@ -135,6 +158,18 @@ class Simulation:
                 buckets[bucket_key].append(job_dict[job_key][0])
             except:
                 buckets[bucket_key] = [job_dict[job_key][0]]
+
+        #add empty list for any missing buckets
+        locations = ['Receiving', 'Shipping', 'Lab']
+        mylabels = [(loc, i) for loc in locations for i in range(2, self.task_n+2)]
+        for label in mylabels:
+            try:
+                buckets[label]
+            except:
+                buckets[label] = []
+
+
+
         return buckets
 
     def _generate_random_job(self):

@@ -33,7 +33,7 @@ class Forklift:
     def __init__(self, start_position, job):
         self.position = start_position # actually the destination
         self.prev_position = start_position
-        self.task_list = job # should be 'task' list
+        self.job_list = job # should be 'task' list
         self.job_number = 0
         self.next_update_time = 0
         self.status = '' #['traveling', 'waiting', 'picking', 'complete']
