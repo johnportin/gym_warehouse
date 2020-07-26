@@ -9,7 +9,7 @@ class Q_table:
                  max_capacity = 5,
                  norm_cap = 3,
                  action_space = None,
-                 learning_rate = 0.9, 
+                 learning_rate = 0.9,
                  discount = 0.6):
         self.LOC_CAPACITY = max_capacity; # Number of forklifts we can overlay at the 3 processing places
         self.MAX_TASK_LEN = max_task_len; # Task length starts from 2 to MAX_TASK_LEN, including boundaries
@@ -22,21 +22,21 @@ class Q_table:
         self.learning_rate = learning_rate
         self.discount = discount
         self.OBS_DICT=self._make_observation_dict()
-        ##### This is the actual Q table ##### 
+        ##### This is the actual Q table #####
         self.TABLE = self.init_Q()
-        ######################################        
-    
+        ######################################
+
     def Update_Q(self, current_obs, new_obs, action, reward):
         """
         Update the Q table
         """
         max_future_q = np.max(list(self.TABLE[new_obs].values()))
         current_q = self.TABLE[current_obs][action]
-        
+
         new_q = (1 - self.learning_rate) * current_q + \
             self.learning_rate * (reward + self.discount * max_future_q)
         self.TABLE[current_obs][action] = new_q
-        
+
     def init_Q(self):
         """
         Q table initialization: Q[actual observation][actual action]
@@ -44,9 +44,9 @@ class Q_table:
         """
         Q = {}
         for observation in self.OBS_DICT.values():
-            Q[observation] = {action: 0 for action in self.action_space}#env.action_space.n)]
+            Q[observation] = {action: 0 for action in range(self.action_space.n)}#env.action_space.n)]
         return Q
-    
+
     def _make_observation_dict(self):
         OBS_DICT = {}
         """
@@ -71,7 +71,7 @@ class Q_table:
         job_load = list(range(self.NORM_CAP + 1)) # all allowed job load (normalized) for each type: 0,1,2,3
         destinations = ['Shipping', 'Lab', 'Receiving']
         if_forklift_available = [True, False]
-        for loadS2 in job_load: 
+        for loadS2 in job_load:
             for loadS3 in job_load:
                 for loadS4 in job_load:
                     for loadL2 in job_load:
@@ -89,9 +89,6 @@ class Q_table:
                                                                              loadR2,loadR3,loadR4,
                                                                              cap_ship,cap_lab,cap_receive,if_avai_fl)
                                                             key += 1
-        
+
 
         return OBS_DICT
-    
-
-        

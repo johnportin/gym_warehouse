@@ -17,6 +17,7 @@ FINAL_TIME = 1000
 X_DIM = 5
 Y_DIM = 5
 REWARD_BAD_SCHEDULE = -10
+NORM_CAP = 3
 
 
 #hyperparameters
@@ -37,7 +38,7 @@ def runEpisode():
     #initialize environment
     observation = env.reset()
     total_reward = 0
-    Q = Q_table_module.Q_table(TASKS_N, CAPACITY, env.action_space)
+    Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
 
     for time_step in range(FINAL_TIME): #while env.done == False
         print('Time = {} '.format(time_step) + '-'*20)
