@@ -43,7 +43,7 @@ class Q_table:
         action_space needs to be a list of tuples
         """
         Q = {}
-        for observation in self.OBS_DICT.values():
+        for observation in self.OBS_DICT.values(): #initialize the q-table as 0 for each action, state pair
             Q[observation] = {action: 0 for action in range(self.action_space.n)}#env.action_space.n)]
         return Q
 

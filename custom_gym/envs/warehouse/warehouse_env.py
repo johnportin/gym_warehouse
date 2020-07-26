@@ -46,9 +46,10 @@ class WarehouseEnv(gym.Env):
                 forklift.update_pick_up_time(time)
                 self.sim.buckets[action].remove(job)
                 self.sim.update(time)
-            else: #otherwise, take a negative reward
-                print('negative reward')
-                reward -= REWARD_BAD_SCHEDULE
+        else:
+            reward = self.reward()
+
+
 
         observation = self.sim.getObs()
 
@@ -56,6 +57,9 @@ class WarehouseEnv(gym.Env):
         if sum(observation[0:TASKS_N * LOCATIONS_N]) == 0:
             print('Final observation before done = {}'.format(observation))
             done = True
+
+        #since a forklift was given, we have an availabilty
+        observation[-1] = 1 #set last value to 1, else 0
 
         return observation, reward, done
 
@@ -65,12 +69,15 @@ class WarehouseEnv(gym.Env):
         print('Step successful')
 
 
-    def episode_reward(self): #reward for end of episode
+    def reward(self): #reward for end of episode
         observation = self.sim.getObs()
         penalty = 0.0
-        for i in range(9):
-            penalty += observation[i]
-        reward = 1 - penalty/(env.JOBS_N) #penalize if jobs left over
+
+        if observation[-1] == 1: #only penalize if an action could have been taken
+            for i in range(9):
+                penalty += observation[i]
+            #reward = 1 - penalty/(env.JOBS_N) #penalize if jobs left over
+            reward = -1
         return reward
 
     def reset(self):

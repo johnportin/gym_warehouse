@@ -24,14 +24,13 @@ NORM_CAP = 3
 epsilon = 0.7  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
 
-def epsilonGreedy(eps):
-    action = env.action_space.sample()
-    '''
+def epsilonGreedy(eps = 0.7, state):
+    #action = env.action_space.sample()
     if np.random.uniform(0,1) < eps:
         action = env.action_space.sample()
     else:
-        action = np.argmax(q_table[state])
-    '''
+        action = np.argmax(Q[state])
+        #action = max(Q[state], key = Q[state].get)
 
 
 def runEpisode():
@@ -53,8 +52,8 @@ def runEpisode():
 
                 if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
                     print('assigning forklift')
-                    #action = epsilonGreedy(epsilon)
-                    action = env.action_space.sample()
+                    action = epsilonGreedy(epsilon, observation)
+                    #action = env.action_space.sample()
                     observation_temp = observation
                     observation, reward, done = env.step(action, time_step, forklift)
                     Q.Update_Q(observation_temp, observation, action, reward)
