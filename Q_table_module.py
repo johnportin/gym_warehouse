@@ -32,7 +32,7 @@ class Q_table:
         """
         new_obs = tuple(new_obs) ##added: because nparray is unhashable
         current_obs = tuple(current_obs)
-        print(new_obs)
+        #print(new_obs)
         max_future_q = np.max(list(self.TABLE[new_obs].values()))
         current_q = self.TABLE[current_obs][action]
 

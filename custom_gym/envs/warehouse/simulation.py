@@ -53,7 +53,7 @@ class Simulation:
             index = self.getJobType(job)
             #print('job type = {}'.format(index))
             capacities[index] += 1
-            print('cap = {}'.format(capacities))
+            #print('cap = {}'.format(capacities))
 
         return capacities
 
@@ -109,9 +109,9 @@ class Simulation:
     def isFeasible(self, action):
         try:
 
-            print(self.buckets[action][0])
+            #print(self.buckets[action][0])
             self.buckets[action][0]
-            print('is feasible')
+            #print('is feasible')
             return True
         except:
             return False
@@ -126,14 +126,14 @@ class Simulation:
                 #if next location is unoccupied, add this forklift to it and update the next time
                 if forklift.status == 'traveling' or forklift.status == 'waiting':
                     if self.warehouse.__getattribute__(str(forklift.position)).occupied == 0:
-                        print('adding forklif to {}'.format(forklift.position))
+                        #print('adding forklif to {}'.format(forklift.position))
                         self.warehouse.__getattribute__(str(forklift.position)).add_forklift()
                         forklift.update_pick_up_time(time)
                     else:
                         forklift.status = 'waiting'
                 #if it was picking, update its status to next position
                 elif forklift.status == 'picking':
-                    print('removing forklift at {}'.format(forklift.position))
+                    #print('removing forklift at {}'.format(forklift.position))
                     self.warehouse.__getattribute__(str(forklift.position)).remove_forklift()
                     forklift.update_travel_time(time)
 

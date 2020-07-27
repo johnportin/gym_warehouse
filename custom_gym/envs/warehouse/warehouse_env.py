@@ -1,6 +1,7 @@
 import gym
 from gym import spaces
 import numpy as np
+import matplotlib.pyplot as plt
 from envs.warehouse.components import Warehouse, Forklift, FloorPatch
 from envs.warehouse.simulation import Simulation
 
@@ -34,9 +35,9 @@ class WarehouseEnv(gym.Env):
 
         if action < self.action_space.n - 1: #check to see whether the action was waiting or not
             action = self.sim.getAction(action) #return the action as a tuple for dict lookup
-            print('action = {}'.format(action))
+            #print('action = {}'.format(action))
             if self.sim.isFeasible(action):
-                print('action possible')
+                #print('action possible')
                 #access the job and remove it from the job list
                 job = self.sim.buckets[action][0]
                 forklift.job_list = job
@@ -46,13 +47,13 @@ class WarehouseEnv(gym.Env):
                 self.sim.buckets[action].remove(job)
                 self.sim.update(time)
         else:
-            reward = self.reward()
+            reward = self.reward(time)
 
         observation = self.sim.getObs()
 
         #check whether all jobs have been completed
         if sum(observation[0:TASKS_N * LOCATIONS_N]) == 0:
-            print('Final observation before done = {}'.format(observation))
+            #print('Final observation before done = {}'.format(observation))
             done = True
 
         #since a forklift was given, we have an availabilty
@@ -60,16 +61,18 @@ class WarehouseEnv(gym.Env):
 
         return observation, reward, done
 
-    def reward(self): #reward for end of episode
+    def reward(self, time): #reward for end of episode
         observation = self.sim.getObs()
         penalty = 0.0
-        reward = 0
+        reward = 0.0
 
         if observation[-1] == 1: #only penalize if an action could have been taken
             for i in range(9):
                 penalty += observation[i]
             #reward = 1 - penalty/(env.JOBS_N) #penalize if jobs left over
-            reward = -1
+            reward = -10
+        else:
+            reward = 1
         return reward
 
     def reset(self):
@@ -78,11 +81,12 @@ class WarehouseEnv(gym.Env):
         self.jobs_n = JOBS_N
         self.capacity = CAPACITY
         self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N, joblist_n = JOBS_N, task_n = TASKS_N)
-        print('Environment reset')
+        #print('Environment reset')
         return self.sim.getObs()
         #return observation (This will just be the initial state of the simulation)
 
     def render(self):
-        print(self.observation_space)
+        #print(self.observation_space)
         #output = 'Completed {} jobs so far'.format(self.observation_space)
         #print(output)
+        pass

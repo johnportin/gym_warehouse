@@ -2,12 +2,13 @@ import gym
 import envs
 import numpy as np
 import Q_table_module
+import matplotlib.pyplot as plt
 
 
 
 
-MAX_EPISODES = 10
-MAX_TRY = 10
+MAX_EPISODES = 10000
+#MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 10
 CAPACITY = 3
@@ -24,13 +25,20 @@ NORM_CAP = 2
 epsilon = 0.7  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
 
+def plot(outputs):
+    X = range(MAX_EPISODES)
+    Y = outputs
+    plt.plot(X,Y)
+    plt.show()
+
+
 def epsilonGreedy(eps, state, Q):
     #action = env.action_space.sample()
     if np.random.uniform(0,1) < eps:
         action = env.action_space.sample()
     else:
         state = tuple(state) #else unhashable numpy.ndarray
-        print('Q table type = {}, length ='.format(type(Q)))
+        #print('Q table type = {}, length ='.format(type(Q)))
         action = np.argmax(Q.TABLE[state])
         #action = max(Q[state], key = Q[state].get)
     return action
@@ -40,12 +48,13 @@ def runEpisode():
     #initialize environment
     observation = env.reset()
     total_reward = 0
-    Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
+    #Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
 
     for time_step in range(FINAL_TIME): #while env.done == False
-        print('Time = {} '.format(time_step) + '-'*20)
+        #print('Time = {} '.format(time_step) + '-'*20)
         if env.done == True:
-            print('Exiting at the top')
+            running_reward.append(total_reward)
+            #print('Exiting at the top')
             break
         else:
             env.sim.update(time_step)
@@ -54,7 +63,7 @@ def runEpisode():
                 forklift = env.sim.__getattribute__(name)
 
                 if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
-                    print('assigning forklift')
+                    #print('assigning forklift')
                     action = epsilonGreedy(epsilon, observation, Q)
                     #action = env.action_space.sample()
                     observation_temp = observation
@@ -63,9 +72,7 @@ def runEpisode():
                     #print(observation)
         total_reward += reward
         if done == True:
-            print('Exiting at the bottom')
-            env.render()
-            env.reset()
+            running_reward.append(total_reward)
             break
 
 
@@ -78,9 +85,20 @@ if __name__ == "__main__":
 
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
-    print('buckets = {}'.format(env.sim.buckets))
-    #initialize q table with zeros as dictionary
-    runEpisode()
+
+    running_reward = []
+
+    #initialize Q table outisde of episodes
+    Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
+
+    for episode in range(MAX_EPISODES):
+        runEpisode()
+        env.render()
+        env.reset()
+
+    print(running_reward)
+    plot(running_reward)
+
 
     #env.step()
     env.render()
