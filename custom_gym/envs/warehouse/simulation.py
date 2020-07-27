@@ -50,9 +50,15 @@ class Simulation:
             forklift = self.__getattribute__(name)
             job = forklift.job_list
             #print('getCapacity(): job = ', forklift.job_list)
-            index = self.getJobType(job)
+            try:
+                index = self.getJobType(job)
+                if capacities[index] < 3:
+                    capacities[index] += 1
+            except:
+                continue
             #print('job type = {}'.format(index))
-            capacities[index] += 1
+
+
             #print('cap = {}'.format(capacities))
 
         return capacities

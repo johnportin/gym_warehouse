@@ -7,15 +7,15 @@ from envs.warehouse.simulation import Simulation
 
 # WAREHOUSE SETTINGS
 TASKS_N = 3
-JOBS_N = 30
+JOBS_N = 100
 CAPACITY = 2
 LOCATIONS_N = 3
-FORKLIFTS_N = 3
+FORKLIFTS_N = 20
 X_DIM = 5
 Y_DIM = 5
 
 #TRAINING SETTINGS
-REWARD_BAD_SCHEDULE = -10
+#@REWARD_BAD_SCHEDULE = -10
 ######FINAL_TIME = 10000
 
 class WarehouseEnv(gym.Env):
@@ -46,8 +46,8 @@ class WarehouseEnv(gym.Env):
                 forklift.update_pick_up_time(time)
                 self.sim.buckets[action].remove(job)
                 self.sim.update(time)
-        else:
-            reward = self.reward(time)
+
+        reward = self.reward(time)
 
         observation = self.sim.getObs()
 
@@ -73,7 +73,8 @@ class WarehouseEnv(gym.Env):
             reward = -10
         else:
             reward = 1
-        return reward
+
+        return reward 
 
     def reset(self):
         '''Resets the environment for another run

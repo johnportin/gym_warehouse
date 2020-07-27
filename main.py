@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 
 
 
-MAX_EPISODES = 10000
+MAX_EPISODES = 1000
 #MAX_TRY = 10
 TASKS_N = 3
-JOBS_N = 10
+JOBS_N = 100
 CAPACITY = 3
 LOCATIONS_N = 3
-FORKLIFTS_N = 3
+FORKLIFTS_N = 20
 FINAL_TIME = 1000
 X_DIM = 5
 Y_DIM = 5
@@ -27,9 +27,18 @@ granularity =  1 #default = 1 is three levels
 
 def plot(outputs):
     X = range(MAX_EPISODES)
+    #X = plt.xlim(0, MAX_EPISODES)
     Y = outputs
-    plt.plot(X,Y)
+    #plt.plot(X,Y)
+    plt.scatter(X,Y)
     plt.show()
+
+def runningAverage(mylist):
+    cumulative_total = 0
+    for i in range(len(mylist)):
+        cumulative_total += mylist[i]
+        mylist[i] = float(cumulative_total) / (i+1)
+    return mylist
 
 
 def epsilonGreedy(eps, state, Q):
@@ -72,11 +81,12 @@ def runEpisode():
                     #print(observation)
         total_reward += reward
         if done == True:
+            running_time.append(time_step)
             running_reward.append(total_reward)
             break
 
 
-
+# reward = a
 
 
 if __name__ == "__main__":
@@ -87,6 +97,7 @@ if __name__ == "__main__":
     env = gym.make('Warehouse-v0')
 
     running_reward = []
+    running_time = []
 
     #initialize Q table outisde of episodes
     Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
@@ -97,7 +108,8 @@ if __name__ == "__main__":
         env.reset()
 
     print(running_reward)
-    plot(running_reward)
+    #plot(runningAverage(running_reward))
+    plot(runningAverage(running_time))
 
 
     #env.step()
