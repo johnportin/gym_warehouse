@@ -32,7 +32,6 @@ class WarehouseEnv(gym.Env):
         reward = 0.0
         done = False
 
-
         if action < self.action_space.n - 1: #check to see whether the action was waiting or not
             action = self.sim.getAction(action) #return the action as a tuple for dict lookup
             print('action = {}'.format(action))
@@ -49,8 +48,6 @@ class WarehouseEnv(gym.Env):
         else:
             reward = self.reward()
 
-
-
         observation = self.sim.getObs()
 
         #check whether all jobs have been completed
@@ -63,15 +60,10 @@ class WarehouseEnv(gym.Env):
 
         return observation, reward, done
 
-        #calculate the reward based on the action
-        #calculate whether the simulation has ended (done = False)
-        #return observation, reward, done, _
-        print('Step successful')
-
-
     def reward(self): #reward for end of episode
         observation = self.sim.getObs()
         penalty = 0.0
+        reward = 0
 
         if observation[-1] == 1: #only penalize if an action could have been taken
             for i in range(9):
@@ -81,12 +73,14 @@ class WarehouseEnv(gym.Env):
         return reward
 
     def reset(self):
+        '''Resets the environment for another run
+            returns the initial state'''
         self.jobs_n = JOBS_N
         self.capacity = CAPACITY
         self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N, joblist_n = JOBS_N, task_n = TASKS_N)
-
-        #return observation (This will just be the initial state of the simulation)
         print('Environment reset')
+        return self.sim.getObs()
+        #return observation (This will just be the initial state of the simulation)
 
     def render(self):
         print(self.observation_space)

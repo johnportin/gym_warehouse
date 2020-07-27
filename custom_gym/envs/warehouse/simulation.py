@@ -57,7 +57,7 @@ class Simulation:
 
         return capacities
 
-    def toGrad(self, obs): #converts
+        '''     def toGrad(self, obs): #converts
         gradient = [0, self.jobs_n / (self.task_n * 3 * 2), self.jobs_n / self.task_n]
         if obs <= 0:
             obs = 0
@@ -67,6 +67,17 @@ class Simulation:
             obs = 2
         else:
             obs = 3
+        return obs'''
+
+
+    def toGrad(self, obs):  #More memory efficient
+        gradient = [0, self.jobs_n / (self.task_n * 3 * 2), self.jobs_n / self.task_n]
+        if obs <= 0:
+            obs = 0
+        elif obs > 0 and obs <= gradient[1]:
+            obs = 1
+        else:
+            obs = 2
         return obs
 
     def getObs(self):

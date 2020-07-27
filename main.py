@@ -17,20 +17,23 @@ FINAL_TIME = 1000
 X_DIM = 5
 Y_DIM = 5
 REWARD_BAD_SCHEDULE = -10
-NORM_CAP = 3
+NORM_CAP = 2
 
 
 #hyperparameters
 epsilon = 0.7  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
 
-def epsilonGreedy(eps = 0.7, state):
+def epsilonGreedy(eps, state, Q):
     #action = env.action_space.sample()
     if np.random.uniform(0,1) < eps:
         action = env.action_space.sample()
     else:
-        action = np.argmax(Q[state])
+        state = tuple(state) #else unhashable numpy.ndarray
+        print('Q table type = {}, length ='.format(type(Q)))
+        action = np.argmax(Q.TABLE[state])
         #action = max(Q[state], key = Q[state].get)
+    return action
 
 
 def runEpisode():
@@ -52,7 +55,7 @@ def runEpisode():
 
                 if forklift.status == '' or forklift.status == 'complete':  #take action if available forklift
                     print('assigning forklift')
-                    action = epsilonGreedy(epsilon, observation)
+                    action = epsilonGreedy(epsilon, observation, Q)
                     #action = env.action_space.sample()
                     observation_temp = observation
                     observation, reward, done = env.step(action, time_step, forklift)
