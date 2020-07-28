@@ -102,7 +102,7 @@ if __name__ == "__main__":
     env = gym.make('Warehouse-v0')
     #training_list = env.sim._generate_job_list()
 
-    file = open('sample1.txt', 'w+')
+    file = open('sample_random.txt', 'w+')
     file.write('episode, time, episode_reward\n')
     file.close()
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
         if episode % 10 == 0:
             data_points = [episode, time, reward]
             print('episode = {} \ttime = {} \treward = {}'.format(*data_points))
-            file = open('sample1.txt', 'a')
+            file = open('sample_random.txt', 'a')
             data_points_str = '{}, {}, {}, {} \n'.format(episode, time, reward, reward_cumulative)
             #file.write(str(episode) + ', ' + str(time) + ', ' + str(reward) + '\n')
             file.write(data_points_str)
