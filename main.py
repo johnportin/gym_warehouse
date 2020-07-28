@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 
-MAX_EPISODES = 1000
+MAX_EPISODES = 100
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
@@ -78,6 +78,8 @@ def runEpisode():
                     observation_temp = observation
                     observation, reward, done = env.step(action, time_step, forklift)
                     Q.Update_Q(observation_temp, observation, action, reward)
+                    if done == True:
+                        break
                     #print(observation)
         total_reward += reward
         if done == True:
