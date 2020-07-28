@@ -2,6 +2,8 @@
 Everything related to the Q table is included in this class
 """
 import numpy as np
+import pickle
+import time
 
 class Q_table:
     def __init__(self,
@@ -25,6 +27,14 @@ class Q_table:
         ##### This is the actual Q table #####
         self.TABLE = self.init_Q()
         ######################################
+
+    def Export_Q(self):
+        with open(f"qtable-{int(time.time())}.pickle", "wb") as f:
+            pickle.dump(self.TABLE, f)
+
+    def Import_Q(self, Q_table_filename):
+        with open(Q_table_filename, "rb") as f:
+            self.TABLE = pickle.load(f)
 
     def Update_Q(self, current_obs, new_obs, action, reward):
         """

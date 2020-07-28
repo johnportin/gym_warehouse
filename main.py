@@ -55,9 +55,10 @@ def epsilonGreedy(eps, state, Q):
 
 def runEpisode(epsilon):
     #initialize environment
-    observation = env.reset()
+    #observation = env.reset()
     total_reward = 0
     #Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
+    observation = env.sim.getObs()
 
     for time_step in range(FINAL_TIME): #while env.done == False
         #print('Time = {} '.format(time_step) + '-'*20)
@@ -99,6 +100,7 @@ if __name__ == "__main__":
 
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
+    training_list = env.sim._generate_job_list()
 
     file = open('sample1.txt', 'w+')
     file.write('episode, time, episode_reward\n')
@@ -114,6 +116,8 @@ if __name__ == "__main__":
     epsilon = EPSILON
     for episode in range(MAX_EPISODES):
 
+        observation = env.reset()
+        env.sim.job_list = training_list
         time, reward = runEpisode(epsilon)
         running_time.append(time)
         running_reward.append(reward)
@@ -132,6 +136,9 @@ if __name__ == "__main__":
 
         if episode % 300 == 0:
             epsilon = EPSILON
+
+
+    Q.Export_Q()
 
     #plot(runningAverage(running_reward))
     #plot(running_time)
