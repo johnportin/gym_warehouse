@@ -71,8 +71,13 @@ class WarehouseEnv(gym.Env):
 
         if sum(observation[0:9]) == 0:
             for i in range(9):
+<<<<<<< HEAD
                 #penalty += observation[i]
                 reward = self.max_time / 100 - (penalty / (self.jobs_n)) - (time / self.max_time) #penalize if jobs left over
+=======
+                penalty += observation[i]
+                reward = 1 - (penalty / (self.jobs_n)) - (time / self.max_time) #penalize if jobs left over
+>>>>>>> 2fc5edbd7f716790ff8d48ca81872cdd651ba714
         elif observation[-1] == 1: #only penalize if an action could have been taken
             reward = -1
         else:

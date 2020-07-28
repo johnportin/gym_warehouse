@@ -8,7 +8,11 @@ import matplotlib.pyplot as plt
 
 
 
+<<<<<<< HEAD
 MAX_EPISODES = 250000
+=======
+MAX_EPISODES = 2000
+>>>>>>> 2fc5edbd7f716790ff8d48ca81872cdd651ba714
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
@@ -100,9 +104,19 @@ if __name__ == "__main__":
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
 
+<<<<<<< HEAD
     file = open('sample1.txt', 'w+')
     file.write('episode, time, episode_reward\n')
     file.close()
+=======
+    try:
+        file = open('sample1.txt', 'a')
+        file.close()
+    except:
+        file = open('sample1.txt', 'w+')
+        file.write('episode, time, episode_reward\n')
+        file.close()
+>>>>>>> 2fc5edbd7f716790ff8d48ca81872cdd651ba714
 
     running_reward = []
     running_time = []
@@ -127,7 +141,11 @@ if __name__ == "__main__":
             file.write(data_points_str)
             file.close()
 
+<<<<<<< HEAD
         if episode % 100 == 0:
+=======
+        if episode % 1000 == 0:
+>>>>>>> 2fc5edbd7f716790ff8d48ca81872cdd651ba714
             epsilon = EPSILON
 
 
@@ -136,7 +154,10 @@ if __name__ == "__main__":
 
     #plot(runningAverage(running_reward))
     #plot(running_time)
+<<<<<<< HEAD
     plot(running_time)
+=======
+>>>>>>> 2fc5edbd7f716790ff8d48ca81872cdd651ba714
     plot(running_reward)
 
 
