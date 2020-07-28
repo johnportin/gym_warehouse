@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
-    training_list = env.sim._generate_job_list()
+    #training_list = env.sim._generate_job_list()
 
     file = open('sample1.txt', 'w+')
     file.write('episode, time, episode_reward\n')
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     for episode in range(MAX_EPISODES):
 
         observation = env.reset()
-        env.sim.job_list = training_list
+        #env.sim.job_list = training_list
         time, reward = runEpisode(epsilon)
         running_time.append(time)
         running_reward.append(reward)
