@@ -1,5 +1,6 @@
 import gym
 import envs
+import os
 import numpy as np
 import Q_table_module
 import matplotlib.pyplot as plt
@@ -7,22 +8,21 @@ import matplotlib.pyplot as plt
 
 
 
-MAX_EPISODES = 100
+MAX_EPISODES = 250000
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
 CAPACITY = 3
 LOCATIONS_N = 3
-FORKLIFTS_N = 20
-FINAL_TIME = 1000
+FORKLIFTS_N = 13
+FINAL_TIME = 600
 X_DIM = 5
 Y_DIM = 5
-REWARD_BAD_SCHEDULE = -10
 NORM_CAP = 2
 
 
 #hyperparameters
-epsilon = 0.7  #for epsilon greedy
+EPSILON = 0.995  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
 
 def plot(outputs):
@@ -53,7 +53,7 @@ def epsilonGreedy(eps, state, Q):
     return action
 
 
-def runEpisode():
+def runEpisode(epsilon):
     #initialize environment
     observation = env.reset()
     total_reward = 0
@@ -62,7 +62,8 @@ def runEpisode():
     for time_step in range(FINAL_TIME): #while env.done == False
         #print('Time = {} '.format(time_step) + '-'*20)
         if env.done == True:
-            running_reward.append(total_reward)
+            return time_step, total_reward
+            #running_reward.append(total_reward)
             #print('Exiting at the top')
             break
         else:
@@ -83,9 +84,11 @@ def runEpisode():
                     #print(observation)
         total_reward += reward
         if done == True:
-            running_time.append(time_step)
-            running_reward.append(total_reward)
+            return time_step, total_reward
+            #running_time.append(time_step)
+            #running_reward.append(total_reward)
             break
+    return time_step, total_reward
 
 
 # reward = a
@@ -94,9 +97,12 @@ def runEpisode():
 if __name__ == "__main__":
 
 
-
     #initial testing of environment to make sure it initalizes.
     env = gym.make('Warehouse-v0')
+
+    file = open('sample1.txt', 'w+')
+    file.write('episode, time, episode_reward\n')
+    file.close()
 
     running_reward = []
     running_time = []
@@ -104,14 +110,34 @@ if __name__ == "__main__":
     #initialize Q table outisde of episodes
     Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
 
+    epsilon = EPSILON
     for episode in range(MAX_EPISODES):
-        runEpisode()
-        env.render()
-        env.reset()
 
-    print(running_reward)
+        time, reward = runEpisode(epsilon)
+        running_time.append(time)
+        running_reward.append(reward)
+        #env.render()
+        epsilon *= EPSILON
+        if episode % 10 == 0:
+            data_points = [episode, time, reward]
+            print('episode = {} \ttime = {} \treward = {}'.format(*data_points))
+            file = open('sample1.txt', 'a')
+            data_points_str = '{}, {}, {} \n'.format(episode, time, reward)
+            #file.write(str(episode) + ', ' + str(time) + ', ' + str(reward) + '\n')
+            file.write(data_points_str)
+            file.close()
+
+        if episode % 100 == 0:
+            epsilon = EPSILON
+
+
+
+
+
     #plot(runningAverage(running_reward))
-    plot(runningAverage(running_time))
+    #plot(running_time)
+    plot(running_time)
+    plot(running_reward)
 
 
     #env.step()

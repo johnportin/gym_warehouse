@@ -10,9 +10,10 @@ TASKS_N = 3
 JOBS_N = 100
 CAPACITY = 2
 LOCATIONS_N = 3
-FORKLIFTS_N = 20
+FORKLIFTS_N = 13
 X_DIM = 5
 Y_DIM = 5
+FINAL_TIME = 600
 
 #TRAINING SETTINGS
 #@REWARD_BAD_SCHEDULE = -10
@@ -23,6 +24,7 @@ class WarehouseEnv(gym.Env):
         #Defines an array [length of joblist, number of forklifts, capacity of dropoff, position of forklifts x3]
         self.observation_space = spaces.Box(np.array([0, 0, 0, 0, 0, 0]), np.array([JOBS_N, FORKLIFTS_N, CAPACITY, 100, 100, 100]), dtype = np.int)
         self.action_space = spaces.Discrete(LOCATIONS_N * TASKS_N + 1) #+1 for wait action
+        self.max_time = FINAL_TIME
         self.jobs_n = JOBS_N
         self.capacity = CAPACITY
         self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N)
@@ -67,10 +69,10 @@ class WarehouseEnv(gym.Env):
         reward = 0.0
 
 
-        if sum(obs[0:9]) == 0:
+        if sum(observation[0:9]) == 0:
             for i in range(9):
-                penalty += observation[i]
-                reward = 1 - penalty/(env.jobs_n) #penalize if jobs left over
+                #penalty += observation[i]
+                reward = self.max_time / 100 - (penalty / (self.jobs_n)) - (time / self.max_time) #penalize if jobs left over
         elif observation[-1] == 1: #only penalize if an action could have been taken
             reward = -1
         else:
