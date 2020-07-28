@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 
-MAX_EPISODES = 150000
+MAX_EPISODES = 900
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
@@ -48,8 +48,8 @@ def epsilonGreedy(eps, state, Q):
     else:
         state = tuple(state) #else unhashable numpy.ndarray
         #print('Q table type = {}, length ='.format(type(Q)))
-        action = np.argmax(Q.TABLE[state])
-        #action = max(Q[state], key = Q[state].get)
+        #action = np.argmax(Q.TABLE[state])
+        action = max(Q.TABLE[state], key = Q.TABLE[state].get)
     return action
 
 
@@ -106,6 +106,7 @@ if __name__ == "__main__":
 
     running_reward = []
     running_time = []
+    reward_cumulative = 0
 
     #initialize Q table outisde of episodes
     Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
@@ -116,23 +117,21 @@ if __name__ == "__main__":
         time, reward = runEpisode(epsilon)
         running_time.append(time)
         running_reward.append(reward)
+        reward_cumulative += reward
+
         #env.render()
         epsilon *= EPSILON
         if episode % 10 == 0:
             data_points = [episode, time, reward]
             print('episode = {} \ttime = {} \treward = {}'.format(*data_points))
             file = open('sample1.txt', 'a')
-            data_points_str = '{}, {}, {} \n'.format(episode, time, reward)
+            data_points_str = '{}, {}, {}, {} \n'.format(episode, time, reward, reward_cumulative)
             #file.write(str(episode) + ', ' + str(time) + ', ' + str(reward) + '\n')
             file.write(data_points_str)
             file.close()
 
-        if episode % 100 == 0:
+        if episode % 300 == 0:
             epsilon = EPSILON
-
-
-
-
 
     #plot(runningAverage(running_reward))
     #plot(running_time)

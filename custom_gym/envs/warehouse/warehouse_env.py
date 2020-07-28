@@ -49,10 +49,18 @@ class WarehouseEnv(gym.Env):
                 self.sim.buckets[action].remove(job)
                 self.sim.update(time)
 
-        reward = self.reward(time)
+            reward = self.reward(time)
+        else: #action == self.action_space.n - 1:
+            observation = self.sim.getObs()
+            if time == self.max_time -1:
+                reward = self.reward(time)
+            else:
+                for i in range(9, 12):
+                    if observation[i] < self.capacity:
+                        reward = -1
+
 
         observation = self.sim.getObs()
-
         #check whether all jobs have been completed
         if sum(observation[0:TASKS_N * LOCATIONS_N]) == 0:
             #print('Final observation before done = {}'.format(observation))
@@ -69,11 +77,12 @@ class WarehouseEnv(gym.Env):
         reward = 0.0
 
 
-        if sum(observation[0:9]) == 0:
-            #penalty += observation[i]
-            reward = self.max_time / 100 - (penalty / (self.jobs_n)) - (time / self.max_time) #penalize if jobs left over
-        elif observation[-1] == 1: #only penalize if an action could have been taken
-            reward = -1
+        if sum(observation[0:9]) == 0 or time == self.max_time-1:
+            for i in range(0,9):
+                penalty += observation[i]
+            reward = self.max_time / 100 * ( 1 - (penalty / (self.jobs_n)))  #penalize if jobs left over
+        #elif observation[-1] == 1: #only penalize if an action could have been taken
+        #    reward = -1
         else:
             reward = -0.01
 
