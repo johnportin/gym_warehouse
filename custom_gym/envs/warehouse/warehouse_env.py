@@ -66,15 +66,17 @@ class WarehouseEnv(gym.Env):
         penalty = 0.0
         reward = 0.0
 
-        if observation[-1] == 1: #only penalize if an action could have been taken
+
+        if sum(obs[0:9]) == 0:
             for i in range(9):
                 penalty += observation[i]
-            #reward = 1 - penalty/(env.JOBS_N) #penalize if jobs left over
-            reward = -10
+                reward = 1 - penalty/(env.jobs_n) #penalize if jobs left over
+        elif observation[-1] == 1: #only penalize if an action could have been taken
+            reward = -1
         else:
-            reward = 1
+            reward = -0.01
 
-        return reward 
+        return reward
 
     def reset(self):
         '''Resets the environment for another run

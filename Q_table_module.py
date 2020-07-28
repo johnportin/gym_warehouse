@@ -6,11 +6,11 @@ import numpy as np
 class Q_table:
     def __init__(self,
                  max_task_len = 4,
-                 max_capacity = 5,
+                 max_capacity = 3,
                  norm_cap = 3,
                  action_space = None,
-                 learning_rate = 0.9,
-                 discount = 0.6):
+                 learning_rate = 0.1,
+                 discount = 0.997):
         self.LOC_CAPACITY = max_capacity; # Number of forklifts we can overlay at the 3 processing places
         self.MAX_TASK_LEN = max_task_len; # Task length starts from 2 to MAX_TASK_LEN, including boundaries
         self.LOCATIONS_N = 3; # 3 Processing places
