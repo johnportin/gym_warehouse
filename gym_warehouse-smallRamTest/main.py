@@ -151,7 +151,7 @@ if __name__ == "__main__":
             epsilon = EPSILON
             print('episode {} out of {}'.format(episode, MAX_EPISODES))
 
-
+    Q.Export_Q()
 
 
 '''
