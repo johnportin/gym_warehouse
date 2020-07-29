@@ -85,19 +85,44 @@ class Simulation:
         else:
             obs = 2
         return obs
+    
+    def toGradNoLength(self, obs):  #More memory efficient
+        """
+        The gradient fuction that deals with the observation spaces with no specific task lengths
+        """
+        gradient = [0, self.jobs_n / (self.task_n * 3 * 2), self.jobs_n / self.task_n]
+        if obs <= 0:
+            obs = 0
+        elif obs > 0 and obs <= gradient[1]:
+            obs = 1
+        else:
+            obs = 2
+        return obs
 
     def getObs(self):
-        observation = np.zeros((self.task_n + 1) * 3 + 1) #each (loc, tasklength) pair + capacity of each location (These are set to 3?) + 1 (I forgot, it doesn't get updated)
+        """
+        Observation vector: 
+        (Num of forklifts at Shipping, (could be rescaled or not)
+        Num of forklifts at Lab,
+        Num of forklifts at Receiving,
+        Capacity at Shipping,
+        Capacity at Lab,
+        Capacity at Receiving,
+        Whether there is a forklift available)
+        """
+        observation = np.zeros(7) # see above
+        #observation = np.zeros((self.task_n + 1) * 3 + 1) #each (loc, tasklength) pair + capacity of each location (These are set to 3?) + 1 (I forgot, it doesn't get updated)
         locations = ['Shipping', 'Lab', 'Receiving']
 
         for i in range(len(locations)): #update number of jobs left of each type
-            for tsk_len in range(self.task_n):
-                observation[3*i+tsk_len] = self.toGrad(len(self.buckets[(locations[i], tsk_len+2)]))
+            observation[i] = self.toGradNoLength(len(self.buckets[locations[i]]))
+            #for tsk_len in range(self.task_n):
+                #observation[3*i+tsk_len] = self.toGrad(len(self.buckets[(locations[i], tsk_len+2)]))
 
         capacities = self.getCapacity() #grab capacities and update observation
-        start_cap = self.task_n*3
+        #start_cap = self.task_n*3
         for i in range(3):
-            observation[start_cap+i] = capacities[i]
+            observation[3+i] = capacities[i]
 
         return observation
 
@@ -152,25 +177,25 @@ class Simulation:
         Key = index
         Tuple[0] = job definition
         Tuple[1] = job destination
-        Tuple[3] = job length
+        #Tuple[3] = job length
         """
         joblist_len = len(joblist)
         job_dict={}
         for index in range(joblist_len):
             job_dict[index] = (joblist[index][0], #job definition
-                               joblist[index][1], #job destination
-                               len(joblist[index][0])) #job length
+                               joblist[index][1])#, #job destination
+                               #len(joblist[index][0])) #job length
         return job_dict
 
     def _make_buckets(self, job_dict):
         """
         Turn a job info dictionary into a dictionary bucket such that:
-        key = (type('Shipping' etc),job length(int))
+        key = type('Shipping' etc)    #(type('Shipping' etc),job length(int))
         value = [specific jobs]
         """
         buckets = {}
         for job_key in job_dict:
-            bucket_key = (job_dict[job_key][1],job_dict[job_key][2])
+            bucket_key = job_dict[job_key][1]#,job_dict[job_key][2])
             try:
                 buckets[bucket_key].append(job_dict[job_key][0])
             except:
@@ -178,7 +203,7 @@ class Simulation:
 
         #add empty list for any missing buckets
         locations = ['Receiving', 'Shipping', 'Lab']
-        mylabels = [(loc, i) for loc in locations for i in range(2, self.task_n+2)]
+        mylabels = [loc for loc in locations]
         for label in mylabels:
             try:
                 buckets[label]

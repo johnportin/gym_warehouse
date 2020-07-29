@@ -2,6 +2,7 @@
 Everything related to the Q table is included in this class
 """
 import numpy as np
+import pandas as pd
 import pickle
 import time
 
@@ -25,20 +26,21 @@ class Q_table:
         self.discount = discount
         self.OBS_DICT=self._make_observation_dict()
         ##### This is the actual Q table #####
-        self.TABLE = self.init_Q()
+        self.TABLE = self._init_Q()
+        self.TABLE_df = self._conv_to_dataframe()
         ######################################
-
+    
     def Export_Q(self):
         with open(f"qtable-{int(time.time())}.pickle", "wb") as f:
             pickle.dump(self.TABLE, f)
-
+    
     def Import_Q(self, Q_table_filename):
         with open(Q_table_filename, "rb") as f:
             self.TABLE = pickle.load(f)
 
     def Update_Q(self, current_obs, new_obs, action, reward):
         """
-        Update the Q table
+        Update the Q table.
         """
         new_obs = tuple(new_obs) ##added: because nparray is unhashable
         current_obs = tuple(current_obs)
@@ -49,8 +51,29 @@ class Q_table:
         new_q = (1 - self.learning_rate) * current_q + \
             self.learning_rate * (reward + self.discount * max_future_q)
         self.TABLE[current_obs][action] = new_q
+            
+    def Update_Q_df(self, current_obs, new_obs, action, reward):
+        """
+        Update the Q table. Slightly different being in dataframe form
+        """
+        new_obs = tuple(new_obs) ##added: because nparray is unhashable
+        current_obs = tuple(current_obs)
+        max_future_q = max(self.TABLE_df.loc[new_obs])
+        current_q = self.TABLE_df.loc[current_obs, action]
 
-    def init_Q(self):
+        new_q = (1 - self.learning_rate) * current_q + \
+            self.learning_rate * (reward + self.discount * max_future_q)
+        self.TABLE_df.loc[current_obs, action] = new_q
+        
+    def _conv_to_dataframe(self):
+        """
+        Convert to a dataframe table
+        """
+        df = pd.DataFrame.from_dict(self.TABLE, orient='index')
+        return df
+        
+
+    def _init_Q(self):
         """
         Q table initialization: Q[actual observation][actual action]
         action_space needs to be a list of tuples
@@ -64,19 +87,12 @@ class Q_table:
         OBS_DICT = {}
         """
         Observations have the following structure:
-        (Num of job Type Shipping w len 2,
-        Num of job Type Shipping w len 3,
-        Num of job Type Shipping w len 4,
-        Num of job Type Lab w len 2,
-        Num of job Type Lab w len 3,
-        Num of job Type Lab w len 4,
-        Num of job Type Receiving w len 2,
-        Num of job Type Receiving w len 3,
-        Num of job Type Receiving w len 4
-        Destination Type,
-        Capacity at Shipping,
-        Capacity at Lab,
-        Capacity at Receiving,
+        (Num of job Type Shipping remained,
+        Num of job Type Lab remained,
+        Num of job Type Receiving remained,
+        Capacity at Shipping currently,
+        Capacity at Lab currently,
+        Capacity at Receiving currently,
         Whether there's an available forklift) in ***tuple*** form
         This function associates all possible observation state
         """
@@ -84,24 +100,17 @@ class Q_table:
         job_load = list(range(self.NORM_CAP + 1)) # all allowed job load (normalized) for each type: 0,1,2,3
         destinations = ['Shipping', 'Lab', 'Receiving']
         if_forklift_available = [True, False]
-        for loadS2 in job_load:
-            for loadS3 in job_load:
-                for loadS4 in job_load:
-                    for loadL2 in job_load:
-                        for loadL3 in job_load:
-                            for loadL4 in job_load:
-                                for loadR2 in job_load:
-                                    for loadR3 in job_load:
-                                        for loadR4 in job_load:
-                                            for cap_ship in range(self.CAP_SHIP+1):
-                                                for cap_lab in range(self.CAP_LAB+1):
-                                                    for cap_receive in range(self.CAP_RECEIVE+1):
-                                                        for if_avai_fl in if_forklift_available:
-                                                            OBS_DICT[key] = (loadS2,loadS3,loadS4,
-                                                                             loadL2,loadL3,loadL4,
-                                                                             loadR2,loadR3,loadR4,
-                                                                             cap_ship,cap_lab,cap_receive,if_avai_fl)
-                                                            key += 1
+        for loadS in job_load:
+            for loadL in job_load:
+                for loadR in job_load:
+                    for cap_ship in range(self.CAP_SHIP+1):
+                        for cap_lab in range(self.CAP_LAB+1):
+                            for cap_receive in range(self.CAP_RECEIVE+1):
+                                for if_avai_fl in if_forklift_available:
+                                    OBS_DICT[key] = (loadS,loadL,loadR,
+                                                     cap_ship,cap_lab,cap_receive,
+                                                     if_avai_fl)
+                                    key += 1
 
 
         return OBS_DICT

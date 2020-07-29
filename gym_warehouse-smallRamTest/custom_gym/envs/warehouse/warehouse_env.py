@@ -8,12 +8,12 @@ from envs.warehouse.simulation import Simulation
 # WAREHOUSE SETTINGS
 TASKS_N = 3
 JOBS_N = 100
-CAPACITY = 3
+CAPACITY = 2
 LOCATIONS_N = 3
 FORKLIFTS_N = 13
-X_DIM = 10
-Y_DIM = 10
-FINAL_TIME = 1200
+X_DIM = 5
+Y_DIM = 5
+FINAL_TIME = 600
 
 #TRAINING SETTINGS
 #@REWARD_BAD_SCHEDULE = -10
@@ -37,6 +37,7 @@ class WarehouseEnv(gym.Env):
 
         if action < self.action_space.n - 1: #check to see whether the action was waiting or not
             action = self.sim.getAction(action) #return the action as a tuple for dict lookup
+            action = action[0]
             #print('action = {}'.format(action))
             if self.sim.isFeasible(action):
                 #print('action possible')
@@ -49,42 +50,37 @@ class WarehouseEnv(gym.Env):
                 self.sim.buckets[action].remove(job)
                 self.sim.update(time)
 
-            reward = self.reward(time)
-        else: #action == self.action_space.n - 1:
-            observation = self.sim.getObs()
-            if time == self.max_time -1:
-                reward = self.reward(time)
-            else:
-                for i in range(9, 12):
-                    if observation[i] < self.capacity:
-                        reward = -1
-
+        reward = self.reward(time)
 
         observation = self.sim.getObs()
+
         #check whether all jobs have been completed
-        if sum(observation[0:TASKS_N * LOCATIONS_N]) == 0:
+        if sum(observation[0: LOCATIONS_N]) == 0:
             #print('Final observation before done = {}'.format(observation))
             done = True
 
         #since a forklift was given, we have an availabilty
-        observation[-1] = 1 #set last value to 1, else 0
+        observation[-1] = 1 #set last value to 1(True), else 0(False)
 
         return observation, reward, done
 
-    def reward(self, time): #reward for end of episode
+    def reward(self, time): #reward every time step based on time and observation
         observation = self.sim.getObs()
         penalty = 0.0
         reward = 0.0
+        """
+        Consider 3 layers:
+        1. There's no job avail to be assigned 
+        2. There's forklift avail. Penalize
+        3. For every time step, decrease the reward
+        """
+        if sum(observation[0:3]) == 0 or time == self.max_time-1:
+            penalty += sum(observation[0:3])
+            reward = self.max_time / 100 * ( 1 - (penalty / (self.jobs_n))) #penalize if jobs left over
+        elif observation[-1] == 1: #only penalize if an action could have been taken
+            reward = -2#-1
 
-
-        if sum(observation[0:9]) == 0 or time == self.max_time-1:
-            for i in range(0,9):
-                penalty += observation[i]
-            reward = self.max_time / 100 * ( 1 - (penalty / (self.jobs_n)))  #penalize if jobs left over
-        #elif observation[-1] == 1: #only penalize if an action could have been taken
-        #    reward = -1
-        else:
-            reward = -0.01
+        reward += -0.01#*max(time-200,0) # decrease reward every time step, when time > 300
 
         return reward
 
