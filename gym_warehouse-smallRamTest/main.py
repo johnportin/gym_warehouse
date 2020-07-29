@@ -24,7 +24,7 @@ NORM_CAP = 2
 
 
 #hyperparameters
-EPSILON = 0.995  #for epsilon greedy
+EPSILON = 0.99  #for epsilon greedy
 granularity =  1 #default = 1 is three levels
 
 def plot(outputs):
@@ -49,7 +49,7 @@ def plot_seq_ave(mylist, every = 300):
     for node in range(n_nodes):
         local_list[node] = cumulative_total[node] / every
     return (x_values,local_list)
-    
+
 
 def runningAverage(mylist):
     cumulative_total = 0
@@ -154,35 +154,51 @@ if __name__ == "__main__":
 
 
 
+'''
+ #plot(runningAverage(running_reward))
+    #plot(running_time)as np
+import Q_table_module
+import matplotlib.pyplot as plt
+import time as globaltime
 
-    #plot(runningAverage(running_reward))
-    #plot(running_time)
-    #plot(running_time)
-    #plot(running_reward)
 
-    #Q.Export_Q() # export Q the q table
-    #env.step()
-    env.render()
-    env.reset()
-    print('It took %i seconds to run' %(globaltime.time()-start_time))
-    
-    plt.style.use('ggplot')
-    fig1 = plt.figure()
-    plt.scatter(range(MAX_EPISODES), runningAverage(running_reward), label = 'avg reward', s=0.5)
-    plt.title('average reward')
-    plt.show()
+start_time = globaltime.time()
 
-    fig2 = plt.figure()
-    plt.scatter(range(MAX_EPISODES), running_reward, label = 'reward', s=0.5)
-    plt.title('running reward')
-    plt.show()
+MAX_EPISODES = 300
+#MAX_TRY = 10
+TASKS_N = 3
+JOBS_N = 100
+CAPACITY = 3
+LOCATIONS_N = 3
+FORKLIFT
 
-    fig3 = plt.figure()
-    plt.scatter(range(MAX_EPISODES), runningAverage(running_time), label = 'running time avg', s=0.5)
-    plt.title('running time avg')
-    plt.show()
+#plot(running_time)
+#plot(running_reward)
 
-    fig4 = plt.figure()
-    plt.scatter(range(MAX_EPISODES), running_time, label = 'running time', s=0.5)
-    plt.title('running time')
-    plt.show()
+#Q.Export_Q() # export Q the q table
+#env.step()
+env.render()
+env.reset()
+print('It took %i seconds to run' %(globaltime.time()-start_time))
+
+plt.style.use('ggplot')
+fig1 = plt.figure()
+plt.scatter(range(MAX_EPISODES), runningAverage(running_reward), label = 'avg reward', s=0.5)
+plt.title('average reward')
+plt.show()
+
+fig2 = plt.figure()
+plt.scatter(range(MAX_EPISODES), running_reward, label = 'reward', s=0.5)
+plt.title('running reward')
+plt.show()
+
+fig3 = plt.figure()
+plt.scatter(range(MAX_EPISODES), runningAverage(running_time), label = 'running time avg', s=0.5)
+plt.title('running time avg')
+plt.show()
+
+fig4 = plt.figure()
+plt.scatter(range(MAX_EPISODES), running_time, label = 'running time', s=0.5)
+plt.title('running time')
+plt.show()
+'''
