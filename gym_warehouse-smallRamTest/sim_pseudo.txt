@@ -1,0 +1,49 @@
+
+
+Implement run for our environment:
+
+time is controlled by main.py:
+
+
+for time_step in range(FINAL_TIME):
+    jobs_completed = 0
+
+    action = get_action() #action is a bucket
+    observation, reward, done, _ = env.step(action) ------ all updating of forklifts happens here
+
+
+
+
+
+env.warehouse_env.step()
+    reward = 0
+
+    #time shouldn't pass unless no forklifts are queued or agents chooses to wait
+    for forklift in forklifts:
+        if forklift.status == "queued":
+            assign forklift job from bucket[action]
+            update forklift travel time
+
+    env.sim.update()
+
+
+def env.sim.update():
+    for each forklift:
+        if forklift needs to be updated (forklift.next_update_time <= time_step):
+            if forklift was traveling or waiting:
+                check to see if space is open:
+                    add forklift to space
+                    update pick up time
+                otherwise:
+                    update status to waiting
+            else if forklift was picking
+                remove forklift from floorpatch
+                update travel time (automatically sets status to complete if necessary)
+                if job is complete:
+                    make forklift available to agent (change status to "queued")
+
+
+
+
+#an observation
+#[o_11, ..., o_33, l_1, l_2, l_3, ]
