@@ -2,23 +2,25 @@ import gym
 import envs
 import os
 import numpy as np
+import time
 import Q_table_module
 import matplotlib.pyplot as plt
 
 
 
 
-MAX_EPISODES = 100000
+MAX_EPISODES = 600
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
 CAPACITY = 3
 LOCATIONS_N = 3
 FORKLIFTS_N = 15
-FINAL_TIME = 1400
+FINAL_TIME = 700
 X_DIM = 10
 Y_DIM = 10
 NORM_CAP = 2
+RESET_LENGTH = 300
 
 
 #hyperparameters
@@ -114,36 +116,44 @@ if __name__ == "__main__":
     Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
 
     epsilon = EPSILON
+
+    current_time = time.time()
+    times = []
     for episode in range(MAX_EPISODES):
 
         observation = env.reset()
         #env.sim.job_list = training_list
-        time, reward = runEpisode(epsilon)
-        running_time.append(time)
+        runtime, reward = runEpisode(epsilon)
+        running_time.append(runtime)
         running_reward.append(reward)
         reward_cumulative += reward
 
         #env.render()
-        epsilon *= EPSILON
-        if episode % 10 == 0:
-            data_points = [episode, time, reward]
-            print('episode = {} \ttime = {} \treward = {}'.format(*data_points))
-            file = open('sample_fixed.txt', 'a')
-            data_points_str = '{}, {}, {}, {} \n'.format(episode, time, reward, reward_cumulative)
-            #file.write(str(episode) + ', ' + str(time) + ', ' + str(reward) + '\n')
-            file.write(data_points_str)
-            file.close()
-
         if episode % 300 == 0:
             epsilon = EPSILON
+        else:
+            epsilon *= EPSILON
+
+        data_points = [episode, runtime, reward, current_time]
+        file = open('sample_fixed.txt', 'a')
+        data_points_str = '{}, {}, {}, {} \n'.format(episode, runtime, reward, reward_cumulative, current_time)
+        #file.write(str(episode) + ', ' + str(time) + ', ' + str(reward) + '\n')
+        file.write(data_points_str)
+        file.close()
+        if episode % 100 == 0 and episode != 0:
+            temp_time = current_time
+            current_time = time.time()
+            print('episode = {} \ttime = {} \treward = {} \tduration {}s'.format(episode, runtime, reward, current_time - temp_time))
+
+
 
 
     Q.Export_Q()
 
-    #plot(runningAverage(running_reward))
-    #plot(running_time)
-    #plot(running_time)
-    #plot(running_reward)
+    plot(running_time)
+    plot(running_reward)
+    plot(runningAverage(running_reward))
+    plot(runningAverage(running_time))
 
 
     #env.step()

@@ -13,7 +13,7 @@ LOCATIONS_N = 3
 FORKLIFTS_N = 13
 X_DIM = 10
 Y_DIM = 10
-FINAL_TIME = 1200
+FINAL_TIME = 700
 
 #TRAINING SETTINGS
 #@REWARD_BAD_SCHEDULE = -10
@@ -76,15 +76,14 @@ class WarehouseEnv(gym.Env):
         penalty = 0.0
         reward = 0.0
 
-
         if sum(observation[0:9]) == 0 or time == self.max_time-1:
             for i in range(0,9):
                 penalty += observation[i]
-            reward = self.max_time / 100 * ( 1 - (penalty / (self.jobs_n)))  #penalize if jobs left over
+            reward = 5 * self.max_time / 100 * ( 1 - (penalty / (self.jobs_n)))  #penalize if jobs left over
         #elif observation[-1] == 1: #only penalize if an action could have been taken
         #    reward = -1
-        else:
-            reward = -0.01
+        elif time > 0.8 * self.max_time:
+            reward = -0.01 * max(time - 0.8 * self.max_time, 0)
 
         return reward
 
