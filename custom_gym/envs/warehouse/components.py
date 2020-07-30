@@ -37,6 +37,7 @@ class Forklift:
         self.job_number = 0
         self.next_update_time = 0
         self.status = '' #['traveling', 'waiting', 'picking', 'complete']
+        self.distance_traveled = 0
 
     def update_travel_time(self, t):
         if self.job_number == len(self.job_list):
@@ -44,6 +45,7 @@ class Forklift:
         else:
             x, y = self.position
             end_x, end_y = self.job_list[self.job_number]
+            self.distance_traveled += (abs(end_x - x) + abs(end_y - y))
             self.job_number += 1
             self.next_update_time = t+ np.ceil( (abs(end_x-x) + abs(end_y - y))*np.random.normal(1, .2, 1)[0] )
             self.prev_position = self.position # update the last known location

@@ -10,7 +10,7 @@ TASKS_N = 3
 JOBS_N = 100
 CAPACITY = 3
 LOCATIONS_N = 3
-FORKLIFTS_N = 13
+FORKLIFTS_N = 15
 X_DIM = 10
 Y_DIM = 10
 FINAL_TIME = 700
@@ -27,7 +27,7 @@ class WarehouseEnv(gym.Env):
         self.max_time = FINAL_TIME
         self.jobs_n = JOBS_N
         self.capacity = CAPACITY
-        self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N)
+        self.sim = Simulation(X_dim = X_DIM, Y_dim = Y_DIM, n_forklifts = FORKLIFTS_N, joblist_n = JOBS_N)
         self.done = False
         print('Environment initialized')
 

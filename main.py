@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 
-MAX_EPISODES = 250000
+MAX_EPISODES = 400000
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
@@ -104,8 +104,9 @@ if __name__ == "__main__":
     env = gym.make('Warehouse-v0')
     #training_list = env.sim._generate_job_list()
 
-    file = open('sample_fixed.txt', 'w+')
-    file.write('episode, time, episode_reward\n')
+    filename = 'training2.txt'
+    file = open(filename, 'w+')
+    file.write('episode, run_time, episode_reward, current_time, distance \n')
     file.close()
 
     running_reward = []
@@ -115,15 +116,25 @@ if __name__ == "__main__":
     #initialize Q table outisde of episodes
     Q = Q_table_module.Q_table(TASKS_N, CAPACITY, NORM_CAP, env.action_space)
 
+    #loads q table from previous training session
+    Q.Import_Q('qtable-1596090326.pickle')
+
     epsilon = EPSILON
 
     current_time = time.time()
     times = []
+
     for episode in range(MAX_EPISODES):
+        cumulative_distance = 0
 
         observation = env.reset()
         #env.sim.job_list = training_list
         runtime, reward = runEpisode(epsilon)
+
+        for name in env.sim.forklift_names:         #loop over forklifts
+            forklift = env.sim.__getattribute__(name)
+            cumulative_distance += forklift.distance_traveled
+
         running_time.append(runtime)
         running_reward.append(reward)
         reward_cumulative += reward
@@ -134,9 +145,10 @@ if __name__ == "__main__":
         else:
             epsilon *= EPSILON
 
-        data_points = [episode, runtime, reward, current_time]
-        file = open('sample_fixed.txt', 'a')
-        data_points_str = '{}, {}, {}, {} \n'.format(episode, runtime, reward, reward_cumulative, current_time)
+
+        data_points = [episode, runtime, reward, current_time, cumulative_distance]
+        file = open(filename, 'a')
+        data_points_str = '{}, {}, {}, {}, {}\n'.format(episode, runtime, reward, current_time, cumulative_distance)
         #file.write(str(episode) + ', ' + str(time) + ', ' + str(reward) + '\n')
         file.write(data_points_str)
         file.close()
