@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 
 
-MAX_EPISODES = 600
+MAX_EPISODES = 250000
 #MAX_TRY = 10
 TASKS_N = 3
 JOBS_N = 100
